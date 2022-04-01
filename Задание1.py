@@ -49,7 +49,6 @@ def sql_table(con):
 
 
 def main(command_line=None):
-    try:
         file_parser = argparse.ArgumentParser(add_help=False)
         file_parser.add_argument(
             "filename",
@@ -115,7 +114,6 @@ def main(command_line=None):
             table(con)
         elif args.command == "select":
             selecting(con, args.type)
-    finally:
         con.close()
 
 
