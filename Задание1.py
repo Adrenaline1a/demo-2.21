@@ -44,12 +44,6 @@ def adding(con, stay, number, value):
     con.commit()
 
 
-def add_date(con):
-    cur= con.cursor()
-    cur.execute("SELECT * FROM datee")
-    print(cur.fetchall())
-
-
 def sql_connection(file):
     try:
         con = sqlite3.connect(file)

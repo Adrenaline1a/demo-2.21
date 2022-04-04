@@ -4,24 +4,42 @@
 
 import argparse
 import psycopg2
+import pprint
 
 
 def selecting(con, nom):
     cur= con.cursor()
-    cur.execute(f"""SELECT * FROM flights WHERE "Тип" = '{nom}'""")
+    cur.execute("""SELECT * FROM datee""")
+    for i in cur.fetchall():
+        b = f'{i[1]}'
+        if nom != b:
+            continue
+        else:
+            cur.execute(f"""SELECT * FROM flights WHERE "Тип" = '{nom}'""")
     print(cur.fetchall())
 
 
 def table(con):
     cur= con.cursor()
+    print("\t\tТаблица рейсов")
     cur.execute("SELECT * FROM flights")
-    print(cur.fetchall())
+    pprint.pprint(cur.fetchall())
+    print("\t\tТаблица зарегестрированных самолётов")
+    cur.execute("SELECT * FROM datee")
+    pprint.pprint(cur.fetchall())
 
 
 def adding(con, stay, number, value):
     cur= con.cursor()
-    cur.execute(f"""INSERT INTO flights("Место прибытия", "Номер самолёта", "Тип") 
-    VALUES('{stay}', '{number}', '{value}');""")
+    cur.execute("""SELECT * FROM datee""")
+    for i in cur.fetchall():
+        a = f'{i[0]}'
+        b = f'{i[1]}'
+        if number != a or value != b:
+            continue
+        else:
+            cur.execute(f"""INSERT INTO flights("Место прибытия", "Номер самолёта", "Тип") 
+            VALUES('{stay}', '{number}', '{value}');""")
     con.commit()
 
 
@@ -33,8 +51,13 @@ def sql_table(con):
     "Место прибытия" text,
     "Номер самолёта" text,
     "Тип" text);
+    """)
+    cursor_obj.execute(
     """
-    )
+    CREATE TABLE IF NOT EXISTS datee (
+    "Номер самолёта" text,
+    "Тип" text)
+    """)
     con.commit()
 
 
