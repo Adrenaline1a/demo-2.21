@@ -5,25 +5,49 @@
 import argparse
 import sqlite3
 from sqlite3 import Error
+import pprint
 
 
 def selecting(con, nom):
     cur= con.cursor()
-    cur.execute("""SELECT * FROM flights WHERE "Тип" = ?""", (nom,))
+    cur.execute("""SELECT * FROM datee""")
+    for i in cur.fetchall():
+        b = f'{i[1]}'
+        if nom != b:
+            continue
+        else:
+            cur.execute("""SELECT * FROM flights WHERE "Тип" = ?""", (nom,))
     print(cur.fetchall())
 
 
 def table(con):
     cur= con.cursor()
+    print("\t\tТаблица рейсов")
     cur.execute("SELECT * FROM flights")
-    print(cur.fetchall())
+    pprint.pprint(cur.fetchall())
+    print("\t\tТаблица зарегестрированных самолётов")
+    cur.execute("SELECT * FROM datee")
+    pprint.pprint(cur.fetchall())
 
 
 def adding(con, stay, number, value):
     cur= con.cursor()
-    cur.execute(f"""INSERT INTO flights("Место прибытия", "Номер самолёта", "Тип") 
-    VALUES(?, ?, ?);""", (stay, number, value))
+    cur.execute("""SELECT * FROM datee""")
+    for i in cur.fetchall():
+        a = f'{i[0]}'
+        b = f'{i[1]}'
+        if number != a or value != b:
+            continue
+        else:
+            cur.execute("""INSERT INTO flights("Место прибытия", "Номер самолёта", "Тип") 
+            VALUES(?, ?, ?);""", (stay, number, value))
     con.commit()
+
+
+def add_date(con):
+    cur= con.cursor()
+    cur.execute("SELECT * FROM datee")
+    print(cur.fetchall())
 
 
 def sql_connection(file):
@@ -43,8 +67,13 @@ def sql_table(con):
     "Место прибытия" text,
     "Номер самолёта" text,
     "Тип" text)
+    """)
+    cursor_obj.execute(
     """
-    )
+    CREATE TABLE IF NOT EXISTS datee (
+    "Номер самолёта" text primary key,
+    "Тип" text)
+    """)
     con.commit()
 
 
@@ -104,6 +133,11 @@ def main(command_line=None):
             action="store",
             required=True,
             help="The required place"
+        )
+        date = subparsers.add_parser(
+            "date",
+            parents=[file_parser],
+            help="Display all workers"
         )
         args = parser.parse_args(command_line)
         con = sql_connection(args.filename)
