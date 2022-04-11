@@ -6,42 +6,46 @@ import argparse
 import sqlite3
 from sqlite3 import Error
 import pprint
+import pathlib
+import random
 
 
-def selecting(con, nom):
+def inf(con, *data):
     cur= con.cursor()
-    cur.execute("""SELECT * FROM datee""")
-    for i in cur.fetchall():
-        b = f'{i[1]}'
-        if nom != b:
-            continue
-        else:
-            cur.execute("""SELECT * FROM flights WHERE "Тип" = ?""", (nom,))
-    print(cur.fetchall())
+    a = 0
+    b = 1
+    while a<b:
+        a = random.randint(250, 300)
+        b = random.randint(270, 300)
+    cur.execute(data[7])
+    fet = cur.fetchall()[-1:]
+    c = fet[0][0]
+    d = fet[0][1]
+    cur.execute(data[6], (c, a, b, d))
+    con.commit()
 
 
-def table(con):
+def selecting(con, nom, *data):
+    cur= con.cursor()
+    cur.execute(data[5], (nom,))
+    pprint.pprint(cur.fetchall())
+
+
+def table(con, *data):
     cur= con.cursor()
     print("\t\tТаблица рейсов")
-    cur.execute("SELECT * FROM flights")
+    cur.execute(data[3])
     pprint.pprint(cur.fetchall())
-    print("\t\tТаблица зарегестрированных самолётов")
-    cur.execute("SELECT * FROM datee")
+    print("\t\tТаблица информации о самолёте")
+    cur.execute(data[4])
     pprint.pprint(cur.fetchall())
 
 
-def adding(con, stay, number, value):
+def adding(con, stay, number, value, *data):
     cur= con.cursor()
-    cur.execute("""SELECT * FROM datee""")
-    for i in cur.fetchall():
-        a = f'{i[0]}'
-        b = f'{i[1]}'
-        if number != a or value != b:
-            continue
-        else:
-            cur.execute("""INSERT INTO flights("Место прибытия", "Номер самолёта", "Тип") 
-            VALUES(?, ?, ?);""", (stay, number, value))
+    cur.execute(data[2],(stay, number, value))
     con.commit()
+    inf(con, *data)
 
 
 def sql_connection(file):
@@ -52,22 +56,10 @@ def sql_connection(file):
         print(Error)
 
 
-def sql_table(con):
+def sql_table(con, *data):
     cursor_obj = con.cursor()
-    cursor_obj.execute(
-    """
-    CREATE TABLE IF NOT EXISTS flights (
-    "№" integer PRIMARY KEY autoincrement,
-    "Место прибытия" text,
-    "Номер самолёта" text,
-    "Тип" text)
-    """)
-    cursor_obj.execute(
-    """
-    CREATE TABLE IF NOT EXISTS datee (
-    "Номер самолёта" text primary key,
-    "Тип" text)
-    """)
+    cursor_obj.execute(data[0])
+    cursor_obj.execute(data[1])
     con.commit()
 
 
@@ -128,20 +120,18 @@ def main(command_line=None):
             required=True,
             help="The required place"
         )
-        date = subparsers.add_parser(
-            "date",
-            parents=[file_parser],
-            help="Display all workers"
-        )
         args = parser.parse_args(command_line)
         con = sql_connection(args.filename)
-        sql_table(con)
+        file = pathlib.Path.cwd()/'inf.sql'
+        with open(file, 'r', encoding='utf-8') as f:
+            data = f.read().split(';')
+        sql_table(con, *data)
         if args.command == "add":
-            adding(con, args.stay, args.number, args.value)
+            adding(con, args.stay, args.number, args.value, *data)
         elif args.command == 'display':
-            table(con)
+            table(con, *data)
         elif args.command == "select":
-            selecting(con, args.type)
+            selecting(con, args.type, *data)
         con.close()
 
 

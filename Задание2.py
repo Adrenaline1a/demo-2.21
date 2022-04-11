@@ -5,64 +5,56 @@
 import argparse
 import psycopg2
 import pprint
+import pathlib
+import random
 
 
-def selecting(con, nom):
+def inf(con, *data):
     cur= con.cursor()
-    cur.execute("""SELECT * FROM datee""")
-    for i in cur.fetchall():
-        b = f'{i[1]}'
-        if nom != b:
-            continue
-        else:
-            cur.execute(f"""SELECT * FROM flights WHERE "Тип" = '{nom}'""")
-    print(cur.fetchall())
-
-
-def table(con):
-    cur= con.cursor()
-    print("\t\tТаблица рейсов")
-    cur.execute("SELECT * FROM flights")
-    pprint.pprint(cur.fetchall())
-    print("\t\tТаблица зарегестрированных самолётов")
-    cur.execute("SELECT * FROM datee")
-    pprint.pprint(cur.fetchall())
-
-
-def adding(con, stay, number, value):
-    cur= con.cursor()
-    cur.execute("""SELECT * FROM datee""")
-    for i in cur.fetchall():
-        a = f'{i[0]}'
-        b = f'{i[1]}'
-        if number != a or value != b:
-            continue
-        else:
-            cur.execute(f"""INSERT INTO flights("Место прибытия", "Номер самолёта", "Тип") 
-            VALUES('{stay}', '{number}', '{value}');""")
+    a = 0
+    b = 1
+    while a<b:
+        a = random.randint(250, 300)
+        b = random.randint(270, 300)
+    cur.execute(data[7])
+    fet = cur.fetchall()[-1:]
+    c = fet[0][0]
+    d = fet[0][1]
+    cur.execute(f'{data[6]}'.format(c, a, b, d))
     con.commit()
 
 
-def sql_table(con):
+def selecting(con, nom, *data):
+    cur= con.cursor()
+    cur.execute(f'{data[5]}'.format(nom))
+    pprint.pprint(cur.fetchall())
+
+
+def table(con, *data):
+    cur= con.cursor()
+    print("\t\tТаблица рейсов")
+    cur.execute(data[3])
+    pprint.pprint(cur.fetchall())
+    print("\t\tТаблица информации о самолёте")
+    cur.execute(data[4])
+    pprint.pprint(cur.fetchall())
+
+
+def adding(con, stay, number, valu, *data):
+    cur= con.cursor()
+    cur.execute(f"{data[2]}".format(stay, number, valu))
+    con.commit()
+    inf(con, *data)
+
+
+def sql_table(con, *data):
     cursor_obj = con.cursor()
-    cursor_obj.execute(
-    """
-    CREATE TABLE IF NOT EXISTS flights (
-    "Место прибытия" text,
-    "Номер самолёта" text,
-    "Тип" text);
-    """)
-    cursor_obj.execute(
-    """
-    CREATE TABLE IF NOT EXISTS datee (
-    "Номер самолёта" text,
-    "Тип" text)
-    """)
+    cursor_obj.execute(data[0])
+    cursor_obj.execute(data[1])
     con.commit()
 
 
 def main(command_line=None):
-    try:
         parser = argparse.ArgumentParser("flights")
         parser.add_argument(
             "--version",
@@ -117,15 +109,17 @@ def main(command_line=None):
                 host="127.0.0.1",
                 port="5432",
                 database="mydatebase")
-        sql_table(connection)
+        file = pathlib.Path.cwd()/'inf2.sql'
+        with open(file, 'r', encoding='utf-8') as f:
+            data = f.read().split(';')
+        sql_table(connection, *data)
         if args.command == "add":
-            adding(connection, args.stay, args.number, args.value)
+            adding(connection, args.stay, args.number, args.value, *data)
         elif args.command == 'display':
-            table(connection)
+            table(connection, *data)
         elif args.command == "select":
-            selecting(connection, args.type)
-    finally:
-        connection.close()
+            selecting(connection, args.type, *data)
+
 
 if __name__ == '__main__':
     main()
