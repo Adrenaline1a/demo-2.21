@@ -55,70 +55,62 @@ def sql_table(con, *data):
 
 
 def main(command_line=None):
-        parser = argparse.ArgumentParser("flights")
-        parser.add_argument(
+    parser = argparse.ArgumentParser("flights")
+    parser.add_argument(
             "--version",
             action="version",
-            version="%(prog)s 0.1.0"
-        )
-        subparsers = parser.add_subparsers(dest="command")
-        add = subparsers.add_parser(
+            version="%(prog)s 0.1.0")
+    subparsers = parser.add_subparsers(dest="command")
+    add = subparsers.add_parser(
             "add",
-            help="Add a new worker"
-        )
-        add.add_argument(
+            help="Add a new worker")
+    add.add_argument(
             "-s",
             "--stay",
             action="store",
             required=True,
-            help="The place"
-        )
-        add.add_argument(
+            help="The place")
+    add.add_argument(
             "-v",
             "--value",
             action="store",
             required=True,
-            help="The name"
-        )
-        add.add_argument(
+            help="The name")
+    add.add_argument(
             "-n",
             "--number",
             action="store",
             required=True,
-            help="The number"
-        )
-        _ = subparsers.add_parser(
+            help="The number")
+    _ = subparsers.add_parser(
             "display",
-            help="Display all workers"
-        )
-        select = subparsers.add_parser(
+            help="Display all workers")
+    select = subparsers.add_parser(
             "select",
-            help="Select the workers"
-        )
-        select.add_argument(
+            help="Select the workers")
+    select.add_argument(
             "-t",
             "--type",
             action="store",
             required=True,
-            help="The required place"
-        )
-        args = parser.parse_args(command_line)
-        connection = psycopg2.connect(
+            help="The required place")
+    args = parser.parse_args(command_line)
+    connection = psycopg2.connect(
                 user="postgres",
                 password="123asdqwezxcD",
                 host="127.0.0.1",
                 port="5432",
                 database="mydatebase")
-        file = pathlib.Path.cwd()/'inf2.sql'
-        with open(file, 'r', encoding='utf-8') as f:
-            data = f.read().split(';')
-        sql_table(connection, *data)
-        if args.command == "add":
-            adding(connection, args.stay, args.number, args.value, *data)
-        elif args.command == 'display':
-            table(connection, *data)
-        elif args.command == "select":
-            selecting(connection, args.type, *data)
+    file = pathlib.Path.cwd()/'inf2.sql'
+    with open(file, 'r', encoding='utf-8') as f:
+        data = f.read().split(';')
+    sql_table(connection, *data)
+    if args.command == "add":
+        adding(connection, args.stay, args.number, args.value, *data)
+    elif args.command == 'display':
+        table(connection, *data)
+    elif args.command == "select":
+        selecting(connection, args.type, *data)
 
 
 if __name__ == '__main__':

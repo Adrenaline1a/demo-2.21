@@ -64,75 +64,67 @@ def sql_table(con, *data):
 
 
 def main(command_line=None):
-        file_parser = argparse.ArgumentParser(add_help=False)
-        file_parser.add_argument(
+    file_parser = argparse.ArgumentParser(add_help=False)
+    file_parser.add_argument(
             "filename",
             action="store",
             help="The data file name"
         )
-        parser = argparse.ArgumentParser("flights")
-        parser.add_argument(
+    parser = argparse.ArgumentParser("flights")
+    parser.add_argument(
             "--version",
             action="version",
-            version="%(prog)s 0.1.0"
-        )
-        subparsers = parser.add_subparsers(dest="command")
-        add = subparsers.add_parser(
+            version="%(prog)s 0.1.0")
+    subparsers = parser.add_subparsers(dest="command")
+    add = subparsers.add_parser(
             "add",
             parents=[file_parser],
-            help="Add a new worker"
-        )
-        add.add_argument(
+            help="Add a new worker")
+    add.add_argument(
             "-s",
             "--stay",
             action="store",
             required=True,
-            help="The place"
-        )
-        add.add_argument(
+            help="The place")
+    add.add_argument(
             "-v",
             "--value",
             action="store",
             required=True,
-            help="The name"
-        )
-        add.add_argument(
+            help="The name")
+    add.add_argument(
             "-n",
             "--number",
             action="store",
             required=True,
-            help="The number"
-        )
-        _ = subparsers.add_parser(
+            help="The number")
+    _ = subparsers.add_parser(
             "display",
             parents=[file_parser],
-            help="Display all workers"
-        )
-        select = subparsers.add_parser(
+            help="Display all workers")
+    select = subparsers.add_parser(
             "select",
             parents=[file_parser],
-            help="Select the workers"
-        )
-        select.add_argument(
+            help="Select the workers")
+    select.add_argument(
             "-t",
             "--type",
             action="store",
             required=True,
-            help="The required place"
-        )
-        args = parser.parse_args(command_line)
-        con = sql_connection(args.filename)
-        file = pathlib.Path.cwd()/'inf.sql'
-        with open(file, 'r', encoding='utf-8') as f:
-            data = f.read().split(';')
-        sql_table(con, *data)
-        if args.command == "add":
-            adding(con, args.stay, args.number, args.value, *data)
-        elif args.command == 'display':
-            table(con, *data)
-        elif args.command == "select":
-            selecting(con, args.type, *data)
-        con.close()
+            help="The required place")
+    args = parser.parse_args(command_line)
+    con = sql_connection(args.filename)
+    file = pathlib.Path.cwd()/'inf.sql'
+    with open(file, 'r', encoding='utf-8') as f:
+        data = f.read().split(';')
+    sql_table(con, *data)
+    if args.command == "add":
+        adding(con, args.stay, args.number, args.value, *data)
+    elif args.command == 'display':
+        table(con, *data)
+    elif args.command == "select":
+        selecting(con, args.type, *data)
+    con.close()
 
 
 if __name__ == '__main__':
